@@ -51,10 +51,18 @@ def normalize_financial_data(input_file='data/raw_sample_stocks.csv'):
         print(f"Checking metadata for {ticker}")
         ticker_obj = yf.Ticker(ticker)
 
-        # Financial metrics from downloaded prices
-        expected_return = (latest_price / first_price) - 1
 
-        expected_risk = prices.pct_change().var()
+        # example. pct_change calculates the percentage change (current / previous) - 1
+        # s = pd.Series([100, 110, 105])
+        # print(s.pct_change())
+        # 0         NaN
+        # 1    0.100000
+        # 2   -0.045455
+        # dtype: float64
+        # That's why we need to drop the first one because it will be NaN
+        returns = prices.pct_change().dropna()
+        expected_return = returns.mean()
+        expected_risk = returns.var()
 
         cost = latest_price
 
