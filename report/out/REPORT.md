@@ -54,13 +54,13 @@ Two algorithms were compared in this study:
 To understand how these algorithms work, we visualize the process of evaluating solutions and identifying the best trade-offs across all random seeds. The left panel shows the search space explored, while the right panel shows the combined Pareto front found by each algorithm.
 
 ### Optimization Process and Pareto Front for N=884
-![Optimization Process N=884](old2/process_aggregated_N884.png)
+![Optimization Process N=884](process_aggregated_N884.png)
 
 ### Optimization Process and Pareto Front for N=1768
-![Optimization Process N=1768](old2/process_aggregated_N1768.png)
+![Optimization Process N=1768](process_aggregated_N1768.png)
 
 ### Optimization Process and Pareto Front for N=2653
-![Optimization Process N=2653](old2/process_aggregated_N2653.png)
+![Optimization Process N=2653](process_aggregated_N2653.png)
 
 ## Data Description
 
@@ -75,7 +75,7 @@ This report summarizes the performance of multi-objective optimization methods.
 
 - **Problem Sizes (N):** [884, 1768, 2653]
 - **Methods:** ['NSGA2', 'RANDOM']
-- **Seeds:** [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+- **Seeds:** [0, 1, 2, 3]
 - **Total Runs:** 180
 
 **Objective Interpretation:**
@@ -96,25 +96,25 @@ Metrics are aggregated across seeds (mean ± 95% CI).
 
 | N | NSGA2 | RANDOM |
 |---|---|---|
-| 884 | 16.434 (16.347 - 16.522) | 3.496 (3.435 - 3.556) |
-| 1768 | 28.114 (27.901 - 28.328) | 4.665 (4.589 - 4.742) |
-| 2653 | 38.164 (37.650 - 38.678) | 5.873 (5.792 - 5.954) |
+| 884 | 2.006 (1.989 - 2.023) | 0.391 (0.351 - 0.430) |
+| 1768 | 6.218 (6.087 - 6.349) | 0.884 (0.848 - 0.920) |
+| 2653 | 12.600 (12.219 - 12.981) | 1.410 (1.364 - 1.456) |
 
 ### IGD+ (↓) mean ± 95% CI
 
 | N | NSGA2 | RANDOM |
 |---|---|---|
-| 884 | 0.015 (0.013 - 0.017) | 1.019 (1.013 - 1.024) |
-| 1768 | 0.046 (0.040 - 0.052) | 1.461 (1.455 - 1.467) |
-| 2653 | 0.080 (0.070 - 0.090) | 1.734 (1.728 - 1.739) |
+| 884 | 0.005 (0.002 - 0.008) | 0.800 (0.772 - 0.827) |
+| 1768 | 0.020 (0.009 - 0.032) | 1.338 (1.327 - 1.348) |
+| 2653 | 0.019 (0.008 - 0.031) | 1.512 (1.495 - 1.528) |
 
 ### |ND| (↑) mean ± 95% CI
 
 | N | NSGA2 | RANDOM |
 |---|---|---|
-| 884 | 299 (299 - 299) | 41 (39 - 43) |
-| 1768 | 299 (299 - 299) | 38 (36 - 39) |
-| 2653 | 295 (292 - 298) | 34 (33 - 36) |
+| 884 | 235 (231 - 239) | 25 (21 - 29) |
+| 1768 | 251 (245 - 257) | 25 (21 - 29) |
+| 2653 | 262 (257 - 266) | 24 (18 - 29) |
 
 ## 3. Combined Pareto Fronts for Different N
 
@@ -131,15 +131,15 @@ As N increases, the problem complexity grows. These plots show the union of non-
 ## 4. Performance Distribution (Boxplots)
 
 ### N = 884
-![N=884 Combined](old2/box_multi_N884.png)
+![N=884 Combined](box_multi_N884.png)
 ### N = 1768
-![N=1768 Combined](old2/box_multi_N1768.png)
+![N=1768 Combined](box_multi_N1768.png)
 ### N = 2653
-![N=2653 Combined](old2/box_multi_N2653.png)
+![N=2653 Combined](box_multi_N2653.png)
 
 ## 5. Runtime Overview
 
 One of the key observations is the speed of the **Random Search** method. Since it does not perform complex sorting or evolutionary operations, it is significantly faster than NSGA-II. In our experiments, Random Search is used as a baseline to see if the extra computational cost of NSGA-II is justified by the quality of the Pareto front it finds.
 
-![Runtime Overview](old2/runtime.png)
+![Runtime Overview](runtime.png)
 
