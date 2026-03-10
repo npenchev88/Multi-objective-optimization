@@ -108,6 +108,44 @@ def plot_pareto_only(df_fronts, N, out_path):
         plt.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close()
 
+def plot_pareto_per_seed(df_fronts, N, seed, out_path):
+    """Plots the Pareto fronts for a specific N and specific seed."""
+    plt.figure(figsize=(10, 8))
+    ax = plt.gca()
+    
+    color_map = {"NSGA2": "#1f77b4", "RANDOM": "#ff7f0e"}
+    markers = {"NSGA2": "o", "RANDOM": "^"}
+    
+    df_ns = df_fronts[(df_fronts["N"] == N) & (df_fronts["seed"] == seed)].copy()
+    if df_ns.empty:
+        plt.close()
+        return
+
+    df_ns["method"] = df_ns["method"].astype(str).str.strip().str.upper()
+    any_plotted = False
+    for method, grp in df_ns.groupby("method"):
+        pts = grp[["f1","f2"]].dropna().to_numpy(dtype=float)
+        if pts.size == 0: continue
+        
+        # In a single seed, the front is already calculated, but let's ensure ND sorting if needed
+        # or just plot as is if we trust the output. Let's use ND sorting to be safe.
+        nd = _union_nd_front(pts)
+        if nd.size == 0: continue
+        
+        value = -nd[:, 0]
+        risk  =  nd[:, 1]
+        ax.scatter(risk, value, s=40, alpha=0.8, label=f"{method} (Seed {seed})", 
+                   color=color_map.get(method), marker=markers.get(method, "o"))
+        idx_sort = np.argsort(risk)
+        ax.plot(risk[idx_sort], value[idx_sort], color=color_map.get(method), alpha=0.5, linestyle='--')
+        any_plotted = True
+
+    if any_plotted:
+        _apply_standard_style(ax, f"Pareto Fronts (N={N}, Seed={seed})", "Expected Risk", "Expected Return")
+        plt.tight_layout()
+        plt.savefig(out_path, dpi=300, bbox_inches="tight")
+    plt.close()
+
 def plot_optimization_process(all_solutions_dir, df_fronts, N, out_path):
     """Multi-panel aggregated plot (Top: All, Bottom: Pareto)."""
     fig, axes = plt.subplots(2, 1, figsize=(10, 16))

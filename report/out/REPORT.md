@@ -54,13 +54,13 @@ Two algorithms were compared in this study:
 To understand how these algorithms work, we visualize the process of evaluating solutions and identifying the best trade-offs across all random seeds. The left panel shows the search space explored, while the right panel shows the combined Pareto front found by each algorithm.
 
 ### Optimization Process and Pareto Front for N=884
-![Optimization Process N=884](process_aggregated_N884.png)
+![Optimization Process N=884](old2/process_aggregated_N884.png)
 
 ### Optimization Process and Pareto Front for N=1768
-![Optimization Process N=1768](process_aggregated_N1768.png)
+![Optimization Process N=1768](old2/process_aggregated_N1768.png)
 
 ### Optimization Process and Pareto Front for N=2653
-![Optimization Process N=2653](process_aggregated_N2653.png)
+![Optimization Process N=2653](old2/process_aggregated_N2653.png)
 
 ## Data Description
 
@@ -131,15 +131,15 @@ As N increases, the problem complexity grows. These plots show the union of non-
 ## 4. Performance Distribution (Boxplots)
 
 ### N = 884
-![N=884 Combined](box_multi_N884.png)
+![N=884 Combined](old2/box_multi_N884.png)
 ### N = 1768
-![N=1768 Combined](box_multi_N1768.png)
+![N=1768 Combined](old2/box_multi_N1768.png)
 ### N = 2653
-![N=2653 Combined](box_multi_N2653.png)
+![N=2653 Combined](old2/box_multi_N2653.png)
 
 ## 5. Runtime Overview
 
 One of the key observations is the speed of the **Random Search** method. Since it does not perform complex sorting or evolutionary operations, it is significantly faster than NSGA-II. In our experiments, Random Search is used as a baseline to see if the extra computational cost of NSGA-II is justified by the quality of the Pareto front it finds.
 
-![Runtime Overview](runtime.png)
+![Runtime Overview](old2/runtime.png)
 

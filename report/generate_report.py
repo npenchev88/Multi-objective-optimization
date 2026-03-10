@@ -9,7 +9,8 @@ from metrics import (
 )
 from plots import (
     plot_optimization_process, plot_box_multi, plot_runtime,
-    plot_population_only, plot_pareto_only, plot_metric_box
+    plot_population_only, plot_pareto_only, plot_metric_box,
+    plot_pareto_per_seed
 )
 
 FRONTS_DIR = "multiobj_outputs/fronts"
@@ -61,6 +62,11 @@ def main():
         plot_metric_box(metrics_per_run, n, 'HV', 'HV Distribution', 'Hypervolume', os.path.join(OUTPUT_DIR, f"HV_box_N{n}.png"))
         plot_metric_box(metrics_per_run, n, 'IGD', 'IGD Distribution', 'IGD+', os.path.join(OUTPUT_DIR, f"IGD_box_N{n}.png"))
         plot_metric_box(metrics_per_run, n, 'ND_size', '|ND| Distribution', 'Number of ND points', os.path.join(OUTPUT_DIR, f"ND_size_box_N{n}.png"))
+
+        # # Per-seed Pareto Fronts. For testing purposes
+        # seeds_for_n = sorted(df_fronts[df_fronts['N'] == n]['seed'].unique())
+        # for s in seeds_for_n:
+        #     plot_pareto_per_seed(df_fronts, n, s, os.path.join(OUTPUT_DIR, f"pareto_N{n}_seed{s}.png"))
 
     plot_runtime(meta_df, os.path.join(OUTPUT_DIR, "runtime.png"))
 
