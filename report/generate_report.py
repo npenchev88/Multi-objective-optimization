@@ -8,11 +8,14 @@ from metrics import (
     load_fronts, load_meta, hv_igd_tables, aggregate_ci
 )
 from plots import (
-    plot_pareto, plot_hv_box, plot_runtime, plot_box_multi
+    plot_optimization_process, plot_box_multi, plot_runtime,
+    plot_population_only, plot_pareto_only, plot_metric_box,
+    plot_pareto_per_seed
 )
 
 FRONTS_DIR = "multiobj_outputs/fronts"
 LOGS_DIR = "multiobj_outputs/logs"
+ALL_SOLUTIONS_DIR = "multiobj_outputs/all_solutions"
 OUTPUT_DIR = "report/out"
 
 def main():
@@ -39,22 +42,42 @@ def main():
     metrics_agg.to_csv(os.path.join(OUTPUT_DIR, "summary_metrics_agg.csv"), index=False)
 
     # Generate plots
+    # Ensure N is treated as numeric for sorting
+    df_fronts['N'] = pd.to_numeric(df_fronts['N'])
     unique_Ns = sorted(df_fronts['N'].unique())
+    
+    # Process Plots for different N
     for n in unique_Ns:
-        plot_pareto(df_fronts, n, os.path.join(OUTPUT_DIR, f"pareto_N{n}.png"))
-        plot_hv_box(metrics_per_run, n, os.path.join(OUTPUT_DIR, f"hv_box_N{n}.png"))
+        # Combined multi-panel
+        plot_optimization_process(ALL_SOLUTIONS_DIR, df_fronts, n, os.path.join(OUTPUT_DIR, f"process_aggregated_N{n}.png"))
+        
+        # Individual panels for paper
+        plot_population_only(ALL_SOLUTIONS_DIR, n, os.path.join(OUTPUT_DIR, f"population_all_N{n}.png"))
+        plot_pareto_only(df_fronts, n, os.path.join(OUTPUT_DIR, f"pareto_all_N{n}.png"))
+
+        # Combined multi-panel boxplots
         plot_box_multi(metrics_per_run, n, os.path.join(OUTPUT_DIR, f"box_multi_N{n}.png"))
+        
+        # Individual metric boxplots
+        plot_metric_box(metrics_per_run, n, 'HV', 'HV Distribution', 'Hypervolume', os.path.join(OUTPUT_DIR, f"HV_box_N{n}.png"))
+        plot_metric_box(metrics_per_run, n, 'IGD', 'IGD Distribution', 'IGD+', os.path.join(OUTPUT_DIR, f"IGD_box_N{n}.png"))
+        plot_metric_box(metrics_per_run, n, 'ND_size', '|ND| Distribution', 'Number of ND points', os.path.join(OUTPUT_DIR, f"ND_size_box_N{n}.png"))
+
+        # # Per-seed Pareto Fronts. For testing purposes
+        # seeds_for_n = sorted(df_fronts[df_fronts['N'] == n]['seed'].unique())
+        # for s in seeds_for_n:
+        #     plot_pareto_per_seed(df_fronts, n, s, os.path.join(OUTPUT_DIR, f"pareto_N{n}_seed{s}.png"))
 
     plot_runtime(meta_df, os.path.join(OUTPUT_DIR, "runtime.png"))
 
     # Generate Markdown Report
-    generate_markdown_report(meta_df, metrics_agg, unique_Ns)
+    generate_markdown_report(meta_df, metrics_agg, unique_Ns, df_fronts)
 
 
-def generate_markdown_report(meta_df, metrics_agg, unique_Ns):
+def generate_markdown_report(meta_df, metrics_agg, unique_Ns, df_fronts):
     """Generates the final Markdown report file."""
     # Lists of Ns and methods actually present in the metrics table
-    Ns = sorted(metrics_agg['N'].unique().tolist())
+    Ns = sorted(pd.to_numeric(metrics_agg['N']).unique().tolist())
     methods = sorted(metrics_agg['method'].unique().tolist())
 
     def render_metric_table(metric: str, is_int: bool = False) -> str:
@@ -66,7 +89,7 @@ def generate_markdown_report(meta_df, metrics_agg, unique_Ns):
         for N in Ns:
             row_cells = []
             for m in methods:
-                row = metrics_agg[(metrics_agg["N"] == N) & (metrics_agg["method"] == m)]
+                row = metrics_agg[(pd.to_numeric(metrics_agg["N"]) == N) & (metrics_agg["method"] == m)]
                 if row.empty:
                     cell = "—"
                 else:
@@ -97,15 +120,24 @@ A classic combinatorial optimization problem
 - You have a knapsack with a capacity W.
 - There are N items, each with value and weight
 - The Goal is to Maximize total value without exceeding the knapsack capacity. 
-\n<img src="knapsack.png" alt="Knapsack" width="600"/>\n
 
-In a portfolio context:\n
-- Capacity -> budget/limit\n
-- Item -> asset (e.g., stock, bond, etc.)\n
-- Item(Weight) -> investment cost\n
-- Item(Value) -> expected return\n
+<img src="knapsack.png" alt="Knapsack" width="600"/>
+
+
+In a portfolio context:
+
+- Capacity -> budget/limit
+
+- Item -> asset (e.g., stock, bond, etc.)
+
+- Item(Weight) -> investment cost
+
+- Item(Value) -> expected return
+
 - Item(Risk) -> Volatility/Uncertainty
-\n<img src="portfolio.png" alt="Portfolio" width="600"/>\n
+
+<img src="portfolio.png" alt="Portfolio" width="600"/>
+
 
 ## Evolutionary Algorithms (EA)
 - Key Idea: Inspired by natural selection.
@@ -115,7 +147,9 @@ In a portfolio context:\n
   - Selection of the best solutions.
   - Recombination (Crossover) and Mutation to create new solutions.
   - Repeat until stopping criteria are met.
-\n<img src="darwin_2.png" alt="Darwin" width="600"/>\n
+
+<img src="darwin_2.png" alt="Darwin" width="600"/>
+
 
 ## Algorithms
 
@@ -123,40 +157,33 @@ Two algorithms were compared in this study:
 
 - **NSGA-II (Non-dominated Sorting Genetic Algorithm II):** A widely-used evolutionary algorithm for multi-objective optimization. It employs mechanisms of selection, crossover, and mutation to iteratively evolve a population of solutions toward the true Pareto front. Its key features include a fast non-dominated sorting procedure and a crowding distance mechanism to maintain diversity among solutions.
 
-- **Random Search:** This method serves as a baseline for comparison. It generates solutions randomly within the search space for a fixed time budget equivalent to that of NSGA-II. This helps to assess whether the sophisticated mechanisms of NSGA-II provide a significant advantage over simple, undirected search.
+- **Random Search:** This method serves as a baseline for comparison. It generates solutions randomly within the search space. In this experiment, it is given a fixed time budget or generation count comparable to NSGA-II to evaluate its efficiency.
 
-## Data Description
+## Optimization Process Visualization
+
+To understand how these algorithms work, we visualize the process of evaluating solutions and identifying the best trade-offs across all random seeds. The left panel shows the search space explored, while the right panel shows the combined Pareto front found by each algorithm.
+
+"""
+    # Show the optimization process for each N
+    for n in unique_Ns:
+        report_content += f"### Optimization Process and Pareto Front for N={n}\n"
+        report_content += f"![Optimization Process N={n}](process_aggregated_N{n}.png)\n\n"
+
+    report_content += f"""## Data Description
 
 We generate asset data using the np.random.normal function from the NumPy library. For each asset, three prop-
 erties were generated: investment cost (weight), return, and
 risk. The weights were drawn from a normal distribution
-with a mean of 10 and a standard deviation of 3 using
-np.random.normal (10, 3, 100,000). Returns were generated using np.random.normal(13, 3, 10000), and risks were
-generated similarly with a specified mean and standard
-deviation. Using np.random.normal provides several advantages:
-Realistic Data Distribution: The normal distribution models
-real-world financial data well, reflecting the variability and
-uncertainty of asset returns and risks.
-Controlled Variability: The mean and standard deviation
-allow for precise control over the data set’s characteristics.
-Scalability: NumPy supports efficient generation of large
-datasets with minimal computational cost.
-Reproducibility: By setting a random seed, the same
-data can be regenerated, ensuring the reproducibility of the
-results. In general, the use of np.random.normal for data
-generation in this study allows the creation of realistic,
-scalable, and reproducible datasets, providing a solid foundation for evaluating the performance of portfolio optimization
-algorithms.
+with a mean of 10 and a standard deviation of 3.
 
 ## 1. Setup
 
 This report summarizes the performance of multi-objective optimization methods.
 
-- **Problem Sizes (N):** {sorted(meta_df['N'].unique())}
-- **Methods:** {sorted(meta_df['method'].unique())}
-- **Seeds:** {sorted(meta_df['seed'].unique())}
+- **Problem Sizes (N):** {unique_Ns}
+- **Methods:** {methods}
+- **Seeds:** {sorted(df_fronts['seed'].unique().tolist())}
 - **Total Runs:** {len(meta_df)}
-- **Time Caps (s):** {sorted(meta_df['time_cap_s'].dropna().unique().tolist())}
 
 **Objective Interpretation:**
 - **Value(Expected return):** `-f1` (higher is better)
@@ -171,7 +198,6 @@ Metrics are aggregated across seeds (mean ± 95% CI).
 - **HV (Hypervolume) ↑:** Measures the volume of the dominated portion of the objective space. Higher is better.
 - **IGD+ (Inverted Generational Distance Plus) ↓:** Measures the average distance from each point in the reference front to the obtained front. Lower is better.
 - **|ND| (Number of Non-Dominated Points) ↑:** The number of points in the final Pareto front. Higher is generally better, indicating more choices.
-- **Pareto Fronts:** The set of non-dominated solutions found by each algorithm.
 
 ### HV (↑) mean ± 95% CI
 
@@ -183,18 +209,17 @@ Metrics are aggregated across seeds (mean ± 95% CI).
     report_content += "\n### |ND| (↑) mean ± 95% CI\n\n"
     report_content += render_metric_table("ND_size", is_int=True)
 
-    report_content += """\n## 3. Pareto Fronts
+    report_content += """\n## 3. Combined Pareto Fronts for Different N
 
 Scatter plots of **Risk vs. Value**.  
-The ideal region is the top-left (low risk, high value).  
-NSGA-II is expected to produce fronts that dominate the random search, demonstrating its effectiveness.
+As N increases, the problem complexity grows. These plots show the union of non-dominated solutions across all seeds.
 
 """
 
     for n in unique_Ns:
         report_content += f"### N = {n}\n![Pareto Front for N={n}](pareto_N{n}.png)\n"
 
-    report_content += """\n## 4. Combined Boxplots (HV / IGD / |ND|)
+    report_content += """\n## 4. Performance Distribution (Boxplots)
 
 """
     for n in unique_Ns:
@@ -203,13 +228,11 @@ NSGA-II is expected to produce fronts that dominate the random search, demonstra
 
     report_content += """\n## 5. Runtime Overview
 
+One of the key observations is the speed of the **Random Search** method. Since it does not perform complex sorting or evolutionary operations, it is significantly faster than NSGA-II. In our experiments, Random Search is used as a baseline to see if the extra computational cost of NSGA-II is justified by the quality of the Pareto front it finds.
+
 ![Runtime Overview](runtime.png)
 
 """
-
-    # runtime_summary = meta_df.groupby(['N', 'method'])['elapsed_s'].agg(['mean', 'std']).reset_index()
-    # report_content += "### Mean Runtime (s) ± Std Dev\n\n" \
-    #                   + runtime_summary.to_markdown(index=False, floatfmt=".2f") + "\n"
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     with open(os.path.join(OUTPUT_DIR, "REPORT.md"), "w") as f:

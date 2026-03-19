@@ -47,40 +47,36 @@ Two algorithms were compared in this study:
 
 - **NSGA-II (Non-dominated Sorting Genetic Algorithm II):** A widely-used evolutionary algorithm for multi-objective optimization. It employs mechanisms of selection, crossover, and mutation to iteratively evolve a population of solutions toward the true Pareto front. Its key features include a fast non-dominated sorting procedure and a crowding distance mechanism to maintain diversity among solutions.
 
-- **Random Search:** This method serves as a baseline for comparison. It generates solutions randomly within the search space for a fixed time budget equivalent to that of NSGA-II. This helps to assess whether the sophisticated mechanisms of NSGA-II provide a significant advantage over simple, undirected search.
+- **Random Search:** This method serves as a baseline for comparison. It generates solutions randomly within the search space. In this experiment, it is given a fixed time budget or generation count comparable to NSGA-II to evaluate its efficiency.
+
+## Optimization Process Visualization
+
+To understand how these algorithms work, we visualize the process of evaluating solutions and identifying the best trade-offs across all random seeds. The left panel shows the search space explored, while the right panel shows the combined Pareto front found by each algorithm.
+
+### Optimization Process and Pareto Front for N=884
+![Optimization Process N=884](process_aggregated_N884.png)
+
+### Optimization Process and Pareto Front for N=1768
+![Optimization Process N=1768](process_aggregated_N1768.png)
+
+### Optimization Process and Pareto Front for N=2653
+![Optimization Process N=2653](process_aggregated_N2653.png)
 
 ## Data Description
 
 We generate asset data using the np.random.normal function from the NumPy library. For each asset, three prop-
 erties were generated: investment cost (weight), return, and
 risk. The weights were drawn from a normal distribution
-with a mean of 10 and a standard deviation of 3 using
-np.random.normal (10, 3, 100,000). Returns were generated using np.random.normal(13, 3, 10000), and risks were
-generated similarly with a specified mean and standard
-deviation. Using np.random.normal provides several advantages:
-Realistic Data Distribution: The normal distribution models
-real-world financial data well, reflecting the variability and
-uncertainty of asset returns and risks.
-Controlled Variability: The mean and standard deviation
-allow for precise control over the data set’s characteristics.
-Scalability: NumPy supports efficient generation of large
-datasets with minimal computational cost.
-Reproducibility: By setting a random seed, the same
-data can be regenerated, ensuring the reproducibility of the
-results. In general, the use of np.random.normal for data
-generation in this study allows the creation of realistic,
-scalable, and reproducible datasets, providing a solid foundation for evaluating the performance of portfolio optimization
-algorithms.
+with a mean of 10 and a standard deviation of 3.
 
 ## 1. Setup
 
 This report summarizes the performance of multi-objective optimization methods.
 
-- **Problem Sizes (N):** ['10', '100', '1000', '10000']
+- **Problem Sizes (N):** [884, 1768, 2653]
 - **Methods:** ['NSGA2', 'RANDOM']
 - **Seeds:** [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
-- **Total Runs:** 240
-- **Time Caps (s):** [25, 100, 175, 250]
+- **Total Runs:** 180
 
 **Objective Interpretation:**
 - **Value(Expected return):** `-f1` (higher is better)
@@ -95,62 +91,55 @@ Metrics are aggregated across seeds (mean ± 95% CI).
 - **HV (Hypervolume) ↑:** Measures the volume of the dominated portion of the objective space. Higher is better.
 - **IGD+ (Inverted Generational Distance Plus) ↓:** Measures the average distance from each point in the reference front to the obtained front. Lower is better.
 - **|ND| (Number of Non-Dominated Points) ↑:** The number of points in the final Pareto front. Higher is generally better, indicating more choices.
-- **Pareto Fronts:** The set of non-dominated solutions found by each algorithm.
 
 ### HV (↑) mean ± 95% CI
 
 | N | NSGA2 | RANDOM |
 |---|---|---|
-| 10 | 626.327 (626.327 - 626.327) | 626.327 (626.327 - 626.327) |
-| 100 | 88210.700 (88169.537 - 88251.864) | 57972.241 (57579.739 - 58364.743) |
-| 1000 | 3672542.847 (3669368.677 - 3675717.017) | 892217.123 (879423.465 - 905010.781) |
-| 10000 | 2779940.308 (2629782.103 - 2930098.513) | 137958.226 (128440.809 - 147475.642) |
+| 884 | 2.284 (2.277 - 2.291) | 0.431 (0.421 - 0.441) |
+| 1768 | 6.318 (6.282 - 6.354) | 0.879 (0.855 - 0.903) |
+| 2653 | 12.105 (11.983 - 12.226) | 1.411 (1.378 - 1.445) |
 
 ### IGD+ (↓) mean ± 95% CI
 
 | N | NSGA2 | RANDOM |
 |---|---|---|
-| 10 | 0.000 (0.000 - 0.000) | 0.000 (0.000 - 0.000) |
-| 100 | 0.327 (0.319 - 0.335) | 39.023 (38.445 - 39.600) |
-| 1000 | 7.114 (6.791 - 7.438) | 558.306 (555.985 - 560.627) |
-| 10000 | 149.190 (129.544 - 168.835) | 1453.729 (1449.668 - 1457.789) |
+| 884 | 0.012 (0.011 - 0.013) | 0.847 (0.840 - 0.853) |
+| 1768 | 0.038 (0.033 - 0.042) | 1.238 (1.231 - 1.244) |
+| 2653 | 0.067 (0.059 - 0.074) | 1.543 (1.538 - 1.549) |
 
 ### |ND| (↑) mean ± 95% CI
 
 | N | NSGA2 | RANDOM |
 |---|---|---|
-| 10 | 14 (14 - 14) | 14 (14 - 14) |
-| 100 | 200 (200 - 200) | 52 (50 - 55) |
-| 1000 | 200 (200 - 200) | 54 (52 - 57) |
-| 10000 | 200 (200 - 200) | 47 (45 - 49) |
+| 884 | 234 (233 - 236) | 26 (24 - 27) |
+| 1768 | 255 (253 - 258) | 24 (23 - 26) |
+| 2653 | 259 (256 - 262) | 24 (22 - 25) |
 
-## 3. Pareto Fronts
+## 3. Combined Pareto Fronts for Different N
 
 Scatter plots of **Risk vs. Value**.  
-The ideal region is the top-left (low risk, high value).  
-NSGA-II is expected to produce fronts that dominate the random search, demonstrating its effectiveness.
+As N increases, the problem complexity grows. These plots show the union of non-dominated solutions across all seeds.
 
-### N = 10
-![Pareto Front for N=10](pareto_N10.png)
-### N = 100
-![Pareto Front for N=100](pareto_N100.png)
-### N = 1000
-![Pareto Front for N=1000](pareto_N1000.png)
-### N = 10000
-![Pareto Front for N=10000](pareto_N10000.png)
+### N = 884
+![Pareto Front for N=884](pareto_N884.png)
+### N = 1768
+![Pareto Front for N=1768](pareto_N1768.png)
+### N = 2653
+![Pareto Front for N=2653](pareto_N2653.png)
 
-## 4. Combined Boxplots (HV / IGD / |ND|)
+## 4. Performance Distribution (Boxplots)
 
-### N = 10
-![N=10 Combined](box_multi_N10.png)
-### N = 100
-![N=100 Combined](box_multi_N100.png)
-### N = 1000
-![N=1000 Combined](box_multi_N1000.png)
-### N = 10000
-![N=10000 Combined](box_multi_N10000.png)
+### N = 884
+![N=884 Combined](box_multi_N884.png)
+### N = 1768
+![N=1768 Combined](box_multi_N1768.png)
+### N = 2653
+![N=2653 Combined](box_multi_N2653.png)
 
 ## 5. Runtime Overview
+
+One of the key observations is the speed of the **Random Search** method. Since it does not perform complex sorting or evolutionary operations, it is significantly faster than NSGA-II. In our experiments, Random Search is used as a baseline to see if the extra computational cost of NSGA-II is justified by the quality of the Pareto front it finds.
 
 ![Runtime Overview](runtime.png)
 

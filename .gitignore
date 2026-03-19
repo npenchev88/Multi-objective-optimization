@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+.idea
+
+multiobj_outputs
+report/out/split_all_solutions/
+report/out/split_fronts/
+report/out/plots_split/

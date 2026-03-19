@@ -1,0 +1,1 @@
+from .stock_data_fetcher import fetch_stock_data

@@ -1,7 +1,7 @@
 Quick instructions:
 
 ```bash
-pip install -r report/requirements_report.txt
+pip install -r report/requirements.txt
 python report/generate_report.py
 ```
 
